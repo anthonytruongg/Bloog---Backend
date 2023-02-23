@@ -1,0 +1,48 @@
+GET http://localhost:3000/users
+
+###
+GET http://localhost:3000/users/63eb4d29c8ae06c5e928baa8
+
+###
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+   "name": "test",
+   "email": "test@gmail.com",
+   "role": "admin"
+}
+###
+DELETE http://localhost:3000/users/63eb4a47eb44d7723a2c49b6
+
+###
+PATCH http://localhost:3000/users/63eb4d29c8ae06c5e928baa8
+Content-Type: application/json
+
+{
+    "name": "updatedName",
+    "email": "updatedemail@gmail.com",
+    "role": "user"
+}
+
+###
+POST http://localhost:3001/users/create/post
+Content-Type: application/json
+
+{
+    "userId": "63eda39c315d9b74c9c0a3de",
+    "title": "NEW USER!!!!",
+    "body": "Hello, I am a new user to bloog!"
+}
+
+###
+POST http://localhost:3001/users/create
+Content-Type: application/json
+
+{
+    "name": "NEW USER TESTING",
+    "email": "testuser@gmil.com"
+}
+
+
+
