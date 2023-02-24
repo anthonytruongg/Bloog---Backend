@@ -1,21 +1,52 @@
 const User = require("../model/user");
 const Post = require("../model/post");
 const Comment = require("../model/comment");
+const bcrypt = require("bcrypt");
 
 const newUser = async (req, res) => {
-  console.log("new user API HIT");
-  const { name, email } = req.body;
+  const re = /\S+@\S+\.\S+/;
+  const { username, password, email } = req.body;
 
   const user = new User({
-    name,
-    email,
+    name: username,
+    email: email,
+    password: password,
   });
 
+  if (user.name.length < 3) {
+    return res.status(400).send("Username must be at least 3 characters long!");
+  }
+  if (user.password.length < 6) {
+    return res.status(400).send("Password must be at least 6 characters long!");
+  }
+  if (user.email !== "") {
+    if (!re.test(user.email)) {
+      return res.status(400).send("Please enter a valid email!");
+    }
+  }
   try {
-    const newUser = await user.save();
-    res.status(201).send(newUser);
+    const existingUser = await User.findOne({
+      $or: [{ email: email }, { name: username }],
+    });
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(409).send("Email already exists!");
+      }
+      if (existingUser.name === username) {
+        return res.status(409).send("Username already exists!");
+      }
+    }
+
+    // hashing password
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(user.password, salt);
+
+    user.password = hash;
+    // await user.save();
+    return res.status(200).send("User registered!");
   } catch (err) {
-    res.status(400).send({ message: err.message });
+    console.log(err);
+    return res.status(500).send("Internal server error.");
   }
 };
 
