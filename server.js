@@ -2,6 +2,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+
 // creating an express app
 // middleware functions to parse incoming requests
 const app = express();

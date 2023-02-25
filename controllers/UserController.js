@@ -2,9 +2,32 @@ const User = require("../model/user");
 const Post = require("../model/post");
 const Comment = require("../model/comment");
 const bcrypt = require("bcrypt");
+const verifyUserData = require("./Middleware");
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    return res.status(404).send("Email does not exist.");
+  }
+  if (user && user.status !== "Active") {
+    return res.status(401).send("Please verify your account.");
+  }
+
+  const validPassword = bcrypt.compare(password, user.password);
+
+  try {
+    if (!validPassword) {
+      return res.status(401).send("Email or password may be wrong.");
+    }
+    return res.status(200).send("User has successfully been logged in.");
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Internal server error.");
+  }
+};
 
 const newUser = async (req, res) => {
-  const re = /\S+@\S+\.\S+/;
   const { username, password, email } = req.body;
 
   const user = new User({
@@ -13,17 +36,6 @@ const newUser = async (req, res) => {
     password: password,
   });
 
-  if (user.name.length < 3) {
-    return res.status(400).send("Username must be at least 3 characters long!");
-  }
-  if (user.password.length < 6) {
-    return res.status(400).send("Password must be at least 6 characters long!");
-  }
-  if (user.email !== "") {
-    if (!re.test(user.email)) {
-      return res.status(400).send("Please enter a valid email!");
-    }
-  }
   try {
     const existingUser = await User.findOne({
       $or: [{ email: email }, { name: username }],
@@ -42,7 +54,7 @@ const newUser = async (req, res) => {
     const hash = bcrypt.hashSync(user.password, salt);
 
     user.password = hash;
-    // await user.save();
+    await user.save();
     return res.status(200).send("User registered!");
   } catch (err) {
     console.log(err);
@@ -128,4 +140,5 @@ module.exports = {
   getAllPosts,
   getUser,
   newComment,
+  login,
 };

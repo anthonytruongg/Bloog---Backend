@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const UserController = require("../controllers/UserController");
+const middleware = require("../controllers/Middleware");
 
 // all postman
 
 // CREATE ACTIONS
 // create a new user
-router.post("/user/new", UserController.newUser);
+router.post("/user/new", middleware.verifyUserData, UserController.newUser);
+// signing in a new user
+router.post("/user/login", UserController.login);
 // creating a new post
 router.post("/post/new", UserController.newPost);
 // creating a new comment
